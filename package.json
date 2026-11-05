@@ -5,22 +5,31 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "convert:books": "tsx utils/convert-books.ts",
+    "prebuild": "npm run convert:books",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.4",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-opener": "^2"
+    "tailwindcss": "^4.3.4"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^6.0.2",
+    "dompurify": "^3.4.17",
+    "jsdom": "^29.1.1",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
-    "vite": "^8.0.16",
-    "@tauri-apps/cli": "^2"
+    "vite": "^8.0.16"
   }
 }
