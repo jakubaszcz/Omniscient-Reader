@@ -80,12 +80,15 @@ async function main(): Promise<void> {
     await mkdir(outputDir, { recursive: true });
 
     let failures = 0;
+    let chapters: string[] = [];
 
     for (const filename of files) {
         try {
             const xhtml = await readFile(path.join(inputDir, filename), "utf8");
             const html = convertChapter(xhtml);
             const outputName = filename.replace(/\.xhtml$/i, ".html");
+
+            chapters.push(outputName)
 
             await writeFile(
                 path.join(outputDir, outputName),
@@ -102,6 +105,12 @@ async function main(): Promise<void> {
             );
         }
     }
+
+    await writeFile(
+        path.join(outputDir, "chapters.json"),
+        JSON.stringify(chapters, null, 2),
+        "utf8",
+    );
 
     console.log(
         `${files.length - failures}/${files.length} chapitre(s) converti(s).`,

@@ -1,50 +1,76 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import {use, useEffect, useState} from "react";
 import "./App.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [chapters, setChapters] = useState<string[]>([]);
+  const [html, setHtml] = useState("");
+  const [error, setError] = useState("");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  const controller = new AbortController();
+
+  useEffect(() => {
+    async function loadChapters() {
+      try {
+        const response = await fetch(
+            `public/books/chapters.json`
+        );
+
+        if (!response.ok) {
+          throw new Error('Cannot load chapters.')
+        }
+
+        const files: string[] = await response.json();
+        setChapters(files);
+      } catch (error) {
+        error instanceof Error ? error.message: "Cannot load."
+      }
+    }
+
+    loadChapters();
+
+  }, []);
+
+  async function loadChapter(chapter: number) {
+    try {
+      const response = await fetch(
+          `public/books/ch_${chapter}.html`,
+          { signal: controller.signal },
+      );
+
+      if (!response.ok) {
+        throw new Error("Impossible de charger le chapitre.");
+      }
+
+      const content = await response.text();
+
+      if (!controller.signal.aborted) {
+        setHtml(content);
+      }
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setError(
+            error instanceof Error ? error.message : "Erreur de chargement.",
+        );
+      }
+    }
   }
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
+      <main>
+        <p>{chapters.length} Chapters</p>
+        {chapters.map((_, index) => (
+            <button
+                key={index}
+                onClick={() => loadChapter(index + 1)}
+            >
+              Chapter {index + 1}
+            </button>
+        ))}
+        <article
+            className="reader"
+            dangerouslySetInnerHTML={{ __html: html }}
         />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+      </main>
   );
 }
 
