@@ -1,5 +1,1 @@
 @import "tailwindcss";
-
-@layer components {
-  .orv-chapter-title { @apply text-3xl font-medium tracking-tight text-red; }
-}
