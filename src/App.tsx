@@ -4,6 +4,7 @@ import {Chapter} from "./chapter/Chapter.tsx";
 
 function App() {
   const [chapters, setChapters] = useState<string[]>([]);
+  const [index, setIndex] = useState<number>(0);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
 
 
@@ -29,18 +30,34 @@ function App() {
 
   }, []);
 
+    function select(file: string | null, chapter: number) {
+        console.log(chapter)
+        setSelectedChapter(file)
+        setIndex(chapter)
+    }
 
+    function changeChapter(nextIndex: number) {
+        if (nextIndex < 0 || nextIndex >= chapters.length) return;
+        select(chapters[nextIndex], nextIndex);
+        window.scrollTo(0, 0);
+    }
 
   if (selectedChapter) {
     return (
         <main className="mx-auto max-w-3xl px-6 py-8">
           <button
               type="button"
-              onClick={() => setSelectedChapter(null)}
+              onClick={() => select(null, 0)}
           >
             ← Back to chapters
           </button>
           <Chapter key={selectedChapter} file={selectedChapter} />
+            <button disabled={index === 0} onClick={() => changeChapter(index - 1)}>
+                Previous
+            </button>
+            <button disabled={index === chapters.length - 1} onClick={() => changeChapter(index + 1)}>
+                Next
+            </button>
         </main>
     );
   }
@@ -53,7 +70,7 @@ function App() {
               <li
                   key={file}
               >
-                <button type="button" onClick={() => setSelectedChapter(file)}>
+                <button type="button" onClick={() => select(file, index)}>
                   Chapter {index + 1}
                 </button>
               </li>
