@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "convert:books": "tsx utils/convert-books.ts",
+    "convert:computer": "tsx utils/convert-books.ts computer",
+    "convert:android": "tsx utils/convert-books.ts android",
     "prebuild": "npm run convert:books",
     "build": "tsc && vite build",
     "preview": "vite preview",
@@ -33,3 +35,4 @@
     "vite": "^8.0.16"
   }
 }
+

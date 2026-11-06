@@ -11,6 +11,8 @@ export interface Save {
 
 function App() {
   const [chapters, setChapters] = useState<string[]>([]);
+  const [chapterError, setChapterError] = useState("");
+  const [chaptersLoading, setChaptersLoading] = useState(true);
   const [loadChapter, setLoadChapter] = useState<Save | null>(null)
   const [index, setIndex] = useState<number>(0);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
@@ -52,7 +54,9 @@ function App() {
         const files: string[] = await response.json();
         setChapters(files);
       } catch (error) {
-        error instanceof Error ? error.message: "Cannot load."
+        setChapterError(error instanceof Error ? error.message : "Cannot load.");
+      } finally {
+        setChaptersLoading(false);
       }
     }
 
@@ -100,6 +104,8 @@ function App() {
   // @ts-ignore
     return (
       <main>
+        {chaptersLoading && <p role="status">Chargement des chapitres…</p>}
+        {chapterError && <p role="alert">{chapterError}</p>}
         <p>Last saved chapter: {loadChapter?.chapter}</p>
         <button disabled={!loadChapter || !chapters[loadChapter.chapter]} onClick={() => { if (loadChapter) changeChapter(loadChapter.chapter); }}>Last save</button>
         <ul>
@@ -118,4 +124,5 @@ function App() {
 }
 
 export default App;
+
 
