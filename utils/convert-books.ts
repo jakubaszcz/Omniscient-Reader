@@ -23,6 +23,10 @@ function convertChapter(xhtml: string): string {
         throw new Error("Le chapitre ne contient pas de body");
     }
 
+    body.querySelectorAll("p").forEach((paragraph, index) => {
+        paragraph.setAttribute("data-paragraph-id", `p-${index + 1}`);
+    });
+
     body.querySelectorAll("a").forEach((link) => {
         const href = link.getAttribute("href") ?? "";
 

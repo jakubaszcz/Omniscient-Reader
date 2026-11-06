@@ -5,29 +5,33 @@ import {invoke} from "@tauri-apps/api/core";
 
 
 export interface Save {
-    chapter: number
+    chapter: number,
+    paragraph_id: string | null
 }
 
 function App() {
   const [chapters, setChapters] = useState<string[]>([]);
-  const [loadChapter, setLoadChapter] = useState<Save>()
+  const [loadChapter, setLoadChapter] = useState<Save | null>(null)
   const [index, setIndex] = useState<number>(0);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
-
   async function call_save(id: number) {
-      console.log("saved")
-      await invoke<Save>("save", {
-          content: {
-              chapter: id
-          }
-      })
+      try {
+          const content: Save = {
+              chapter: id,
+              paragraph_id: loadChapter?.chapter === id ? loadChapter.paragraph_id : null,
+          };
+          await invoke<void>("save", {content});
+          setLoadChapter(content);
+          console.log("saved");
+      } catch (error) {
+          console.error("Save failed:", error);
+      }
   }
-
   useEffect(() => {
 
     async function fetchChapter() {
         try {
-            const response = await invoke<Save>("load");
+            const response = await invoke<Save | null>("load");
 
             setLoadChapter(response)
         } catch (e) {
@@ -82,7 +86,7 @@ function App() {
             <button onClick={() => call_save(index)}>
                 Save
             </button>
-          <Chapter key={selectedChapter} file={selectedChapter} />
+          <Chapter key={selectedChapter} file={selectedChapter} index={index} save={loadChapter} onSaved={setLoadChapter} />
             <button disabled={index === 0} onClick={() => changeChapter(index - 1)}>
                 Previous
             </button>
@@ -93,10 +97,11 @@ function App() {
     );
 }
 
-  return (
+  // @ts-ignore
+    return (
       <main>
         <p>Last saved chapter: {loadChapter?.chapter}</p>
-        <p>{chapters.length} Chapters</p>
+        <button disabled={!loadChapter || !chapters[loadChapter.chapter]} onClick={() => { if (loadChapter) changeChapter(loadChapter.chapter); }}>Last save</button>
         <ul>
           {chapters.map((file, index) => (
               <li
@@ -113,3 +118,4 @@ function App() {
 }
 
 export default App;
+

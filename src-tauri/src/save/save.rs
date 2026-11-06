@@ -10,7 +10,10 @@ const APPLICATION: &str = "omniscient-reader";
 
 #[derive(Serialize, Deserialize)]
 pub struct Save {
-    pub chapter: i32
+    pub chapter: i32,
+    
+    #[serde(default)]
+    pub paragraph_id: Option<String>,
 }
 
 pub fn _path() -> Option<ProjectDirs> {
