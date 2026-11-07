@@ -11,6 +11,7 @@ export interface Save {
 }
 
 function App() {
+  const [fullscreen, setFullscreen] = useState<boolean>(false)
   const [chapters, setChapters] = useState<string[]>([]);
   const [chapterError, setChapterError] = useState("");
   const [chaptersLoading, setChaptersLoading] = useState(true);
@@ -32,9 +33,11 @@ function App() {
 
             try {
                 const app = getCurrentWindow();
-                const fullscreen = await app.isFullscreen();
+                const isFullscreen = await app.isFullscreen();
 
-                await app.setFullscreen(!fullscreen);
+                setFullscreen(!isFullscreen)
+
+                await app.setFullscreen(fullscreen);
             } catch (e) {
                 console.error(e)
             } finally {
