@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import "./App.css";
 import {Chapter} from "./chapter/Chapter.tsx";
 import {invoke} from "@tauri-apps/api/core";
+import {getCurrentWindow} from "@tauri-apps/api/window";
 
 
 export interface Save {
@@ -16,6 +17,38 @@ function App() {
   const [loadChapter, setLoadChapter] = useState<Save | null>(null)
   const [index, setIndex] = useState<number>(0);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
+
+    useEffect(() => {
+        let changing = false;
+
+        async function handleKeyDown(event: KeyboardEvent) {
+            if (event.key !== "F11") return;
+
+            event.preventDefault();
+
+            if (event.repeat || changing) return;
+
+            changing = true;
+
+            try {
+                const app = getCurrentWindow();
+                const fullscreen = await app.isFullscreen();
+
+                await app.setFullscreen(!fullscreen);
+            } catch (e) {
+                console.error(e)
+            } finally {
+                changing = false
+            }
+        }
+
+        window.addEventListener("keydown", handleKeyDown)
+
+        return () => {
+            window.addEventListener("keydown", handleKeyDown)
+        }
+    }, []);
+
   async function call_save(id: number) {
       try {
           const content: Save = {
