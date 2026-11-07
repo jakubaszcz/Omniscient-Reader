@@ -32,7 +32,7 @@ export function Chapter({file, index, save, onSaved}: {
             await invoke<void>("save", {content});
             onSaved(content);
         } catch (error) {
-            setSaveError(String(error));
+            setSaveError("Unable to save your bookmark. Please try again in the app.");
         } finally {
             saving.current = false;
         }
@@ -78,15 +78,25 @@ export function Chapter({file, index, save, onSaved}: {
         restored.current = true;
     }, [html, loading, error]);
 
-    if (error) return <p role="alert" className="text-red-600">{error}</p>;
-    if (loading) return <p role="status" className="text-gray-500">Chargement…</p>;
+    useEffect(() => {
+        const article = articleRef.current;
+        if (!article) return;
+        article.querySelectorAll("[data-saved]").forEach((paragraph) => paragraph.removeAttribute("data-saved"));
+        if (save?.chapter === index && save.paragraph_id) {
+            article.querySelector(`[data-paragraph-id="${CSS.escape(save.paragraph_id)}"]`)?.setAttribute("data-saved", "true");
+        }
+    }, [save, index, html, loading]);
+
+    if (error) return <p role="alert" className="reader-message">{error}</p>;
+    if (loading) return <p role="status" className="reader-message">Loading…</p>;
 
     return (
         <>
-            {saveError && <p role="alert" className="text-red-600">{saveError}</p>}
+            {saveError && <p role="alert" className="reader-message">{saveError}</p>}
             <article
                 ref={articleRef}
-                className="reader text-lg leading-8 [&_p]:my-4 [&_h2]:my-6 [&_h2]:text-2xl [&_h2]:font-bold [&_img]:max-w-full"
+                className="reader"
+                lang="en"
                 onClick={handleParagraphClick}
                 dangerouslySetInnerHTML={{__html: html}}
             />
